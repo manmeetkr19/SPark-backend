@@ -36,8 +36,8 @@ const userSchema = new mongoose.Schema({
 
 const User = new mongoose.model("user", userSchema);
 
-app.get("/",(req,res)=>{
-  res.send("You are connected to SPARK backend");
+app.get("/",function(req,res){
+  res.send("Spark Backend")
 })
 
 //routes routes
