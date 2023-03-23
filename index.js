@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
 
 const User = new mongoose.model("user", userSchema);
 
+app.get("/",(req,res)=>{
+  res.send("You are connected to SPARK backend");
+})
+
 //routes routes
 app.post("/Login", async(req, res) => {
   const { email, password } = req.body;
