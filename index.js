@@ -1,8 +1,8 @@
-import dotenv from "dotenv"
-import express from "express";
+import dotenv from "dotenv";
+import express, { response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
 dotenv.config();
 const app = express();
@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
 
-const salt =  10;
+const salt = 10;
 
 const url = process.env.URI;
 
@@ -36,42 +36,50 @@ const userSchema = new mongoose.Schema({
 
 const User = new mongoose.model("user", userSchema);
 
-app.get("/",function(req,res){
-  res.send("Spark Backend")
-})
-
-//routes routes
-app.post("/Login", async(req, res) => {
-  const { email, password } = req.body;
-
-  User.findOne({email:email}).then((founduser)=>{
-    if(founduser){
-       const cmp = bcrypt.compare(req.body.password,password);
-       if(cmp){
-        res.send({message:"login sucess", user:founduser})
-       }
-    }else{
-      res.send({message:"no user found"})
-    }
-  }).catch((err)=> console.log(err))
+app.get("/", function (req, res) {
+  res.send("Spark Backend");
 });
 
+//routes routes
+app.post("/Login", async (req, res) => {
+  const { email, password } = req.body;
 
-app.post("/Register", async(req, res) => {
+  User.findOne({ email: email })
+    .then((founduser) => {
+      if (founduser) {
+        bcrypt.compare(password, founduser.password, function(err, data){
+          if (err) throw err;
+          if (data) {
+            return res.status(200).send({ message: "login sucess", user: founduser });
+          } else {
+            return res.status(401).json({ message: "Invalid credentials" });
+          }
+        });
+        //res.send({ message: "login sucess", user: founduser });
+      } else {
+        res.send({ message: "no user found" });
+      }
+    })
+    .catch((err) => console.log(err));
+});
 
-  const password = await bcrypt.hash(req.body.password,salt);
+app.post("/Register", async (req, res) => {
+  const password = await bcrypt.hash(req.body.password, salt);
   const { name, email } = req.body;
 
-  User.findOne({email:email}).then((founduser)=>{
-    if(founduser){
-      res.send({message:"email already exsists"})
-    }else{
-      const newUser = new User({name,email,password})
-      newUser.save().then(()=>{
-        res.send({message:"user registration sucessful"})
-      }).catch((err)=> console.log(err));
+  User.findOne({ email: email }).then((founduser) => {
+    if (founduser) {
+      res.send({ message: "email already exsists" });
+    } else {
+      const newUser = new User({ name, email, password });
+      newUser
+        .save()
+        .then(() => {
+          res.send({ message: "user registration sucessful" });
+        })
+        .catch((err) => console.log(err));
     }
-  })
+  });
 });
 
 app.listen(process.env.PORT, () => {
