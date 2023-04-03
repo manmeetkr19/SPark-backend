@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import express, { response } from "express";
+import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
